@@ -40,7 +40,6 @@ model Variant {
   name        String
   description String?
   image       String?
-  sku         String?
   price       Int
   stock       Int
   optionValues  OptionValue[]
