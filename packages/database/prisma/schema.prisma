@@ -18,6 +18,7 @@ model Product {
   name        String
   description String
   image       String?
+  price       Int
   collections Collection[]
   variants    Variant[]
   options     Option[]
@@ -40,7 +41,6 @@ model Variant {
   name        String
   description String?
   image       String?
-  price       Int
   stock       Int
   optionValues  OptionValue[]
   createdAt   DateTime        @default(now())

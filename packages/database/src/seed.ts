@@ -1,139 +1,81 @@
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
+// Initialize Prisma Client
 const prisma = new PrismaClient();
 
 async function main() {
+  // Create Collections
+  const collections = await Promise.all(
+    Array.from({ length: 5 }).map(() =>
+      prisma.collection.create({
+        data: {
+          name: faker.commerce.department(),
+          description: faker.lorem.paragraph(),
+        },
+      })
+    )
+  );
 
-  for (let i = 0; i < 5; i++) {
+  // Create Products with Variants and Options
+  for (let i = 0; i < 10; i++) {
     const product = await prisma.product.create({
       data: {
         name: faker.commerce.productName(),
         description: faker.commerce.productDescription(),
         image: faker.image.url(),
-        options: {
-          create: [
-            {
-              name: 'Color',
-              values: {
-                create: ['Red', 'Green', 'Blue'].map((value) => ({ value })),
-              },
-            },
-            {
-              name: 'Size',
-              values: {
-                create: ['S', 'M', 'L', 'XL'].map((value) => ({ value })),
-              },
-            },
-          ],
-        }, 
+        price: faker.number.int({ min: 1000, max: 5000 }), // price in cents
+        collections: {
+          connect: collections.map((collection) => ({ id: collection.id })),
+        },
       },
     });
 
-    const variants = await prisma.variant.createManyAndReturn({
-      data: [
-        {
-          productId: product.id,
-          name: 'Bue-L',
-          description: faker.commerce.productDescription(),
-          image: faker.image.url(),
-          price: faker.number.int({ min: 1000, max: 5000 }),
-          stock: faker.number.int({ min: 0, max: 100 }),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          productId: product.id,
-          name: 'Red-M',
-          description: faker.commerce.productDescription(),
-          image: faker.image.url(),
-          price: faker.number.int({ min: 1000, max: 5000 }),
-          stock: faker.number.int({ min: 0, max: 100 }),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
+    // Create Options for Product
+    const options = await Promise.all(
+      Array.from({ length: 2 }).map(async () => {
+        const option = await prisma.option.create({
+          data: {
+            name: faker.commerce.productMaterial(),
             productId: product.id,
-            name: 'Green-XL',
-            description: faker.commerce.productDescription(),
-            image: faker.image.url(),
-            price: faker.number.int({ min: 1000, max: 5000 }),
-            stock: faker.number.int({ min: 0, max: 100 }),
-            createdAt: new Date(),
-            updatedAt: new Date(),
+            values: {
+              create: Array.from({ length: 3 }).map(() => ({
+                value: faker.color.human(), // Generating color values
+              })),
+            },
           },
-      ],
-    });
+          include: {
+            values: true, // Include OptionValues when creating options
+          },
+        });
+        return option;
+      })
+    );
 
-    const colorOptions = await prisma.optionValue.findMany({
-        where: {
-            option: {
-                name: 'Color',
-                productId: product.id,
-            }
-        }
-    })
-
-    const sizeOptions = await prisma.optionValue.findMany({
-        where: {
-            option: {
-                name: 'Size',
-                productId: product.id,
-            }
-        }
-    })
-
-    const connectValues = [
-        [
-            {id: colorOptions.find((c)=> c.value === 'Blue')!.id},
-            {id: sizeOptions.find((c)=> c.value === 'L')!.id}
-        ],
-        [
-            {id: colorOptions.find((c)=> c.value === 'Red')!.id},
-            {id: sizeOptions.find((c)=> c.value === 'M')!.id}
-        ],
-        [
-            {id: colorOptions.find((c)=> c.value === 'Green')!.id},
-            {id: sizeOptions.find((c)=> c.value === 'XL')!.id}
-        ]
-    ]
-
-    for (let j = 0; j< variants.length; j++){
-        const variant = variants[j];
-        await prisma.variant.update({
-            where: {id: variant.id},
-            data: {
-                optionValues: {
-                    connect: connectValues[j]
-                }
-            }
-        })
-    }
-
-    await prisma.collection.createMany({
-        data: Array.from({length: 3}). map(()=> ({
-            name: faker.commerce.department(),
-            description: faker.lorem.sentences(3),
-        }))
-    })
-
-    await prisma.collection.update({
-        where: { id: faker.number.int({ min: 1, max: 3})},
+    // Create Variants for Product
+    for (let j = 0; j < 3; j++) {
+      await prisma.variant.create({
         data: {
-            products: {
-                connect: { id: product.id}
-            }
-        }
-    })
+          name: faker.commerce.productAdjective(),
+          description: faker.lorem.sentence(),
+          image: faker.image.url(),
+          stock: faker.number.int({ min: 10, max: 100 }),
+          productId: product.id,
+          optionValues: {
+            connect: options.flatMap((option) =>
+              option.values.map((value) => ({ id: value.id })) // Correctly map option values
+            ),
+          },
+        },
+      });
+    }
   }
-
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
+  .catch((e) => {
     console.error(e);
+  })
+  .finally(async () => {
     await prisma.$disconnect();
   });

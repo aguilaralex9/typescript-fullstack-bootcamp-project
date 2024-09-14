@@ -17,6 +17,32 @@ export function productsRoute(app: Express): void {
         }
     })
 
+    router.get('/:id', async function(_req, res, next) {
+        const { id } = _req.params
+        try {
+            const response = await productService.GetOneProduct(parseInt(id))
+            return res.json({
+                message: `Product with id: ${id} has been retreived`,
+                id: response.id,
+                data: response
+            })
+        }
+        catch (error) {
+            next(error)
+        }
+    })
+
+    router.get('/products', async (req, res, next) => {
+        const { order } = req.query;
+        try {
+            const sortOrder = order === 'desc' ? 'desc' : 'asc';
+            const products = await productService.GetAllProductsSortedByPrice(sortOrder);
+            return res.json(products);
+        } catch (error) {
+            next(error);
+        }
+    });
+
     router.post('/', async function(_req, res, next) {
         try {
             const response = await productService.AddOneProduct(_req.body)
