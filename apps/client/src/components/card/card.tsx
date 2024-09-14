@@ -1,26 +1,27 @@
+import { Link } from '@tanstack/react-router'
 import type { FC } from 'react'
 import type { CardProps } from './types'
 
-const Card: FC<CardProps> = ({image, title, description}) => {
+const Card: FC<CardProps> = ({id, image, name, price, description}) => {
   return (
-    <button 
-    type='button' 
+    <Link
+     to='/about/$productId'
+     params={{ productId: id }} 
     className="card card-compact bg-base-100 w-96 shadow-xl hover:ring-2 hover:ring-blue-700"
-    onClick={()=>alert('hola')}
     >
         <figure>
             <img
             src={image}
-            alt={title} />
+            alt={name} />
         </figure>
         <div className="card-body items-center">
-            <h2 className="card-title">{title}</h2>
+            <h2 className="card-name">{name}</h2>
             <p>{description}</p>
             <div className="card-actions self-end justify-end">
-                <button className="btn btn-primary">$99.99</button>
+                <span className="rounded-xl p-3 bg-blue-500 text-white text-lg font-bold font-mono">${(parseInt(price) / 100).toFixed(2)}</span>
             </div>
         </div>
-    </button>
+    </Link>
   )
 }
 
