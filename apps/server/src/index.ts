@@ -2,6 +2,7 @@ import bodyParser from 'body-parser'
 import express from 'express'
 import cors from 'cors'
 import { productsRoute } from './routes/products'
+import { collectionsRoute } from './routes/collections'
 import { logErrors } from './middlewares/logMiddleware'
 
 const app = express()
@@ -11,6 +12,7 @@ app.use(bodyParser.json())
 app.use(cors())
 
 productsRoute(app)
+collectionsRoute(app)
 
 app.use(logErrors)
 

@@ -1,5 +1,5 @@
+import daisyui from "daisyui"
 /* global require */
-
 require('tailwindcss/plugin')
 
 /** @type {import('tailwindcss').Config} */
@@ -8,4 +8,5 @@ export default {
   theme: {
     extend: {},
   },
+  plugins: [daisyui],
 }

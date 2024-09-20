@@ -10,12 +10,38 @@ export class ProductService {
           })
           return products;
     }
+    async GetOneProduct(id: number) {
+        const product = await prisma.product.findUnique({
+            where: {
+                id: id
+            },
+            include: {
+                variants: true,
+            }
+        })
+        if(product === null){
+            throw new Error(`Product not found`)
+        }
+        return product
+    }
+    async GetAllProductsSortedByPrice(order: 'asc' | 'desc' = 'asc') {
+        const products = await prisma.product.findMany({
+            orderBy: {
+                price: order, 
+            },
+            include: {
+                variants: true,
+            },
+        });
+        return products;
+    }
     async AddOneProduct(request: Product){
         const newProduct = await prisma.product.create({
             data: {
                 name: request.name,
                 description: request.description,
                 image: request.image,
+                price: request.price,
                 createdAt: new Date(),
                 updatedAt: new Date(),
             }
