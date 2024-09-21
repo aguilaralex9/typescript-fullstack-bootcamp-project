@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
     useQuery,
   } from '@tanstack/react-query'
+  import { handleSort } from '../../utils/handleSort';
 
 const SearchPage = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -13,10 +14,6 @@ const SearchPage = () => {
       .then((result) => result.json()),
   });
     const {isLoading: collectionsLoading, data: collections} = useQuery({ queryKey: ['collections'], queryFn: () => fetch('http://localhost:5001/api/collections').then((result)=> result.json()) })
-    
-    const handleSort = (order: 'asc' | 'desc') => {
-      setSortOrder(order); 
-    };
 
     if(productsLoading || collectionsLoading){
         return <span>Loading...</span>
@@ -55,8 +52,8 @@ const SearchPage = () => {
       </div>
       <div className='flex flex-col items-start'>
         <span className='text-xl text-gray-600 font-semibold'>Sort by</span>
-        <FilterButton onClick={() => handleSort('desc')}>Pricing (Highest to Lowest)</FilterButton>
-        <FilterButton onClick={() => handleSort('asc')}>Pricing (Lowest to Highest)</FilterButton>
+        <FilterButton onClick={() => handleSort('desc', setSortOrder)}>Pricing (Highest to Lowest)</FilterButton>
+        <FilterButton onClick={() => handleSort('asc', setSortOrder)}>Pricing (Lowest to Highest)</FilterButton>
       </div>
       </div>
     </main>
