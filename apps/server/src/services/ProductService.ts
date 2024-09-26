@@ -3,7 +3,7 @@ import { prisma } from "../lib/prismaClient";
 
 export class ProductService {
     async GetAllProducts(){
-        const products = prisma.product.findMany({
+        const products = await prisma.product.findMany({
             include: {
               variants: true,
             }

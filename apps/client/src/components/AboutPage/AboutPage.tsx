@@ -1,5 +1,6 @@
 import { Link, useParams } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
+import { formatPrice } from '../../utils/formatPrice'
 
 const AboutPage = () => {
   const { productId } = useParams({ strict: false })
@@ -8,7 +9,6 @@ const AboutPage = () => {
         return <span>Loading...</span>
     }
     const { image, name, price, variants } = data?.data || {};
-    console.log(data.data)
   return (
     <main className=" bg-blue-100 flex flex-col gap-8 items-center min-h-screen p-8 text-center mx-auto">
       <header className='container w-full flex justify-start items-center'>
@@ -25,7 +25,7 @@ const AboutPage = () => {
         </figure>
       <div className='w-1/3 flex flex-col items-start gap-3 py-5'>
         <h1 className=' text-start text-4xl font-bold'>{name}</h1>
-        <span className="rounded-xl py-2 px-4 bg-blue-500 text-white text-lg font-bold font-mono">${(price / 100).toFixed(2)}</span>
+        <span className="rounded-xl py-2 px-4 bg-blue-500 text-white text-lg font-bold font-mono">{formatPrice(price)}</span>
         <div className="divider my-0" />
         <span className='font-semibold'>VARIANTS</span>
         <div className='flex flex-wrap gap-2'>
